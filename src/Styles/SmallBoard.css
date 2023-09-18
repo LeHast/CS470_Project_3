@@ -1,0 +1,21 @@
+
+.GridBox{
+    border-style: solid;
+    border-radius: 12%;
+    background-color: #8b0000;
+    padding: 1%;
+}
+
+.GridBoard{
+    display: flex;
+    padding: 3px;
+}
+
+.CellBoard{
+    height: 10vh;
+    width: 10vh;
+    border-style: solid;
+    border-radius: 100%;
+    background-color: #cc0000;
+}
+
