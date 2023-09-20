@@ -3,7 +3,10 @@
     border-style: solid;
     border-radius: 12%;
     background-color: #8b0000;
-    padding: 1%;
+    padding: 15px;
+    display: grid;
+    grid-template-columns: auto auto auto;
+    margin-right: 7px;
 }
 
 .GridBoard{
@@ -12,10 +15,16 @@
 }
 
 .CellBoard{
-    height: 10vh;
-    width: 10vh;
+    height: 12vh;
+    width: 12vh;
+    padding: 5px;
     border-style: solid;
+    border-color: #430000;
     border-radius: 100%;
     background-color: #cc0000;
+    margin: 5px;
 }
 
+.btDirection{
+    max-height: 50px;
+}
