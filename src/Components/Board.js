@@ -1,3 +1,4 @@
+// Add black to the win condition
 import '../Styles/Board.css'
 import '../Styles/SmallBoard.css'
 
@@ -8,61 +9,137 @@ import Button from '@mui/material/Button';
 
 import BasicModal from './BasicModal'
 
-const sxBoxStyle = {
-    display: 'flex',
+let stopGame = false;
+let wonPlayer = '';
+
+function MakeArrayCopy (sx, row, col) {
+  const copiedArray = [];
+
+  for (let i = row; i <= row + 2; i++) {
+    const row = [];
+    for (let j = col; j <= col + 2; j++) {
+      row.push({ ...sx[i][j] }); 
+    }
+    copiedArray.push(row);
+  }
+  return copiedArray
 }
 
-
-let binRotate = false;
-
-let stopGame = false;
-let win = false;
-
-function checkForFiveIdenticalValues(arr) {
-  return;
+function checkForFiveIdenticalValues(arr, player = 0) {
+  
   function checkHorizontal() {
-    for (let row of arr) {
-      for (let i = 0; i <= row.length - 5; i++) {
-        if (row.slice(i, i + 5).every(val => val === row[i])) {
+    const players = ['#ffffff', '#000000'];
+    let inArrow = 0;
+
+    for (let rowIdx = 0; rowIdx < 6; rowIdx++) {
+      for (let colIdx = 0; colIdx < 6; colIdx ++) {
+        if (arr[rowIdx][colIdx].backgroundColor !== players[player]){
+          inArrow = 0;
+        }
+        else
+        {
+          inArrow++;
+        }
+        if (inArrow >= 5)
+        {
           return true;
         }
       }
+      inArrow = 0;
     }
     return false;
   }
 
   function checkVertical() {
-    for (let col = 0; col < arr[0].length; col++) {
-      for (let i = 0; i <= arr.length - 5; i++) {
-        if (arr.slice(i, i + 5).every(row => row[col] === arr[i][col])) {
+    const players = ['#ffffff', '#000000'];
+    let inArrow = 0;
+
+    for (let colIdx = 0; colIdx < 6; colIdx ++) {
+      for (let rowIdx = 0; rowIdx < 6; rowIdx++) {
+        if (arr[rowIdx][colIdx].backgroundColor !== players[player]){
+          inArrow = 0;
+        }
+        else
+        {
+          inArrow++;
+        }
+        if (inArrow >= 5)
+        {
           return true;
         }
       }
+      inArrow = 0;
     }
     return false;
   }
 
   function checkDiagonal() {
-    for (let row = 0; row <= arr.length - 5; row++) {
-      for (let col = 0; col <= arr[0].length - 5; col++) {
-        if (Array.from({ length: 5 }).every((_, i) => arr[row + i][col + i] === arr[row][col])) {
+    const players = ['#ffffff', '#000000'];
+    let inArrow = 0;
+  
+    // Check diagonal from top-left to bottom-right
+    for (let offset = 0; offset < 2; offset++)
+      for (let i = 0; i < 6 - offset; i++) {
+        if (arr[i][i + offset].backgroundColor !== players[player]) {
+          inArrow = 0;
+        } else {
+          inArrow++;
+        }
+        if (inArrow >= 5) {
           return true;
         }
       }
-    }
-
-    for (let row = 0; row <= arr.length - 5; row++) {
-      for (let col = arr[0].length - 1; col >= 4; col--) {
-        if (Array.from({ length: 5 }).every((_, i) => arr[row + i][col - i] === arr[row][col])) {
+    inArrow = 0;
+    for (let offset = 0; offset < 2; offset++)
+      for (let i = 0; i < 6 - offset; i++) {
+        if (arr[i + offset][i].backgroundColor !== players[player]) {
+          inArrow = 0;
+        } else {
+          inArrow++;
+        }
+        if (inArrow >= 5) {
           return true;
         }
       }
-    }
+    inArrow = 0;
 
+    // Check diagonal from top-right to bottom-left
+    for (let offset = 0; offset < 2; offset++)
+      for (let i = 0; i < 6 - offset; i++) {
+        if (arr[i][5 - i - offset].backgroundColor !== players[player]) {
+          inArrow = 0;
+        } else {
+          inArrow++;
+        }
+        if (inArrow >= 5) {
+          return true;
+        }
+      }
+      inArrow = 0;
+
+      for (let offset = 0; offset < 2; offset++)
+        for (let i = 0; i < 6 - offset; i++) {
+          if (arr[i + offset][5 - i].backgroundColor !== players[player]) {
+            inArrow = 0;
+          } else {
+            inArrow++;
+          }
+          if (inArrow >= 5) {
+            return true;
+          }
+        }
     return false;
   }
-
-  return checkHorizontal() || checkVertical() || checkDiagonal();
+  
+  if (checkHorizontal() || checkVertical() || checkDiagonal())
+  {
+    if(player === 0)
+      wonPlayer = 'White';
+    else
+      wonPlayer = 'Black';
+    return true;
+  }
+  return false;
 }
 
 const Board = (props) => 
@@ -71,10 +148,10 @@ const Board = (props) =>
     const sxColorInitialState = new Array(6).fill(new Array(6).fill({ backgroundColor: '#primary' }));
     const [sxColor, setSxColor] = useState(sxColorInitialState); // player board
     const [playerState, setPlayerState] = useState(0); // 0 white, 1 black
-    const [activateRotate, setActivateRotate] = useState(true);
+    const [disabledRontateButton, setdisabledRontateButton] = useState(true);
 
     const ChangeColor = (row, col) => {
-        if (binRotate)
+        if (!disabledRontateButton)
             return;
 
         const c = sxColor.map(innerArray => innerArray.map(obj => ({ ...obj })));
@@ -86,11 +163,8 @@ const Board = (props) =>
         if (playerState === 1){
             setPlayerState(0);
         }
-        setActivateRotate(binRotate);
-        binRotate = true;
-        console.log(activateRotate);
-        stopGame = checkForFiveIdenticalValues(sxColor);
-        win = stopGame;
+        setdisabledRontateButton(false);
+        stopGame = checkForFiveIdenticalValues(c, 0); // check for white
 
     } 
 
@@ -121,22 +195,23 @@ const Board = (props) =>
             break;
         }
 
-        //const c = sxColor.map(innerArray => innerArray.map(obj => ({ ...obj })));
+        const c1 = sxColor.map(innerArray => innerArray.map(obj => ({ ...obj })));
+        const c = MakeArrayCopy(sxColor, sectionRow, sectionCol);
 
       // Traverse each cycle
       if (clockwise)
-        for (let i = sectionRow; i < sectionRow + 2; i++) {
-          for (let j = i ; j < sectionCol + 2; j++) {
-            let temp = c[i][j];
-            c[i][j] = c[3 - 1 - j][i];
-            c[3 - 1 - j][i] = c[3 - 1 - i][3 - 1 - j];
-            c[3 - 1 - i][3 - 1 - j] = c[j][3 - 1 - i];
-            c[j][3 - 1 - i] = temp;
-          }
+      for (let i = 0; i < 2; i++) {
+        for (let j = i ; j < 2; j++) {
+          let temp = c[i][j];
+          c[i][j] = c[3 - 1 - j][i];
+          c[3 - 1 - j][i] = c[3 - 1 - i][3 - 1 - j];
+          c[3 - 1 - i][3 - 1 - j] = c[j][3 - 1 - i];
+          c[j][3 - 1 - i] = temp;
         }
+      }
       else
-        for (let i = 0; i < sectionRow + 2; i++) {
-          for (let j = i; j < sectionCol + 2; j++) {
+        for (let i = 0; i < 2; i++) {
+          for (let j = i; j < 2; j++) {
               let temp = c[i][j];
               c[i][j] = c[j][3 - 1 - i];
               c[j][3 - 1 - i] = c[3 - 1 - i][3 - 1 - j];
@@ -144,18 +219,28 @@ const Board = (props) =>
               c[3 - 1 - j][i] = temp;
           }
       }
-        setSxColor(c);
-        binRotate = false;
-        stopGame = checkForFiveIdenticalValues(sxColor);
-        win = stopGame;
+      let x =0;          
+      let y = 0;
+        // Update the original array with the copied subset
+        for (let i = sectionRow; i <= sectionRow + 2; i++) {
+           x = 0;
+          for (let j = sectionCol; j <= sectionCol + 2; j++) {
+            c1[i][j] = { ...c[y][x] };
+            x++;
+          }
+          y++
+        }
+        setSxColor(c1);
+        setdisabledRontateButton(true); // Disabled, rotation finished
+        stopGame = checkForFiveIdenticalValues(sxColor, 0);
     }
 
     return(
         <Box>
             <Box className='GridBoard'> 
                 <Box>
-                    <Button variant='contained' className='btDirection' disabled={activateRotate} onClick={() => rotateMatrix(0, false)}>Left</Button>
-                    <Button variant='contained' className='btDirection' disabled={activateRotate} onClick={() => rotateMatrix(0, true)}>Right</Button>
+                    <Button variant='contained' className='btDirection' disabled={disabledRontateButton} onClick={() => rotateMatrix(0, false)}>Left</Button>
+                    <Button variant='contained' className='btDirection' disabled={disabledRontateButton} onClick={() => rotateMatrix(0, true)}>Right</Button>
                     <Grid className="GridBox" >
                         {
                             sxColor.slice(0,3).map((row, rowIdx) =>
@@ -167,8 +252,8 @@ const Board = (props) =>
                     </Grid>
                 </Box>
                 <Box>
-                  <Button variant='contained' className='btDirection' disabled={activateRotate} onClick={() => rotateMatrix(1, false)}>Left</Button>
-                  <Button variant='contained' className='btDirection' disabled={activateRotate} onClick={() => rotateMatrix(1, true)}>Right</Button>
+                  <Button variant='contained' className='btDirection' disabled={disabledRontateButton} onClick={() => rotateMatrix(1, false)}>Left</Button>
+                  <Button variant='contained' className='btDirection' disabled={disabledRontateButton} onClick={() => rotateMatrix(1, true)}>Right</Button>
                   <Grid className="GridBox" >
                     {
                       sxColor.slice(0,3).map((row, rowIdx) =>
@@ -182,26 +267,35 @@ const Board = (props) =>
             </Box>
 
             <Box className='GridBoard'>  
+                <Box>
+
                 <Grid className="GridBox" >
                     {
-                        sxColor.slice(3,6).map((row, rowIdx) =>
-                        row.slice(0,3).map((cell, colIndex) => ( 
-                            <Box key={colIndex} item='true' sx={sxColor[rowIdx+3][colIndex]} className='CellBoard' onClick={() => ChangeColor(rowIdx + 3, colIndex)}> {rowIdx+3} {colIndex}</Box>
-
+                      sxColor.slice(3,6).map((row, rowIdx) =>
+                      row.slice(0,3).map((cell, colIndex) => ( 
+                        <Box key={colIndex} item='true' sx={sxColor[rowIdx+3][colIndex]} className='CellBoard' onClick={() => ChangeColor(rowIdx + 3, colIndex)}> {rowIdx+3} {colIndex}</Box>
+                        
                         ))
-                    )}
+                        )}
                 </Grid>
-                <Box className="GridBox" >
+                <Button variant='contained' className='btDirection' disabled={disabledRontateButton} onClick={() => rotateMatrix(2, true)}>Right</Button>
+                <Button variant='contained' className='btDirection' disabled={disabledRontateButton} onClick={() => rotateMatrix(2, false)}>Left</Button>
+                </Box>
+                <Box>
+                <Grid className="GridBox" >
                     {
-                        sxColor.slice(3,6).map((row, rowIdx) =>
-                        row.slice(3,6).map((cell, colIndex) => ( 
-                            <Box key={colIndex} item='true' sx={sxColor[rowIdx+3][colIndex + 3]} className='CellBoard' onClick={() => ChangeColor(rowIdx + 3, colIndex + 3)}> {rowIdx+3} {colIndex + 3}</Box>
-
+                      sxColor.slice(3,6).map((row, rowIdx) =>
+                      row.slice(3,6).map((cell, colIndex) => ( 
+                        <Box key={colIndex} item='true' sx={sxColor[rowIdx+3][colIndex + 3]} className='CellBoard' onClick={() => ChangeColor(rowIdx + 3, colIndex + 3)}> {rowIdx+3} {colIndex + 3}</Box>
+                        
                         ))
-                    )}
+                        )}
+                </Grid>
+                <Button variant='contained' className='btDirection' disabled={disabledRontateButton} onClick={() => rotateMatrix(3, false)}>Left</Button>
+                <Button variant='contained' className='btDirection' disabled={disabledRontateButton} onClick={() => rotateMatrix(3, true)}>Right</Button>
                 </Box>
             </Box>
-            <BasicModal toOpen={stopGame}/>
+            <BasicModal toOpen={stopGame} player={wonPlayer}/>
 
         </Box> //Itial Box
     );

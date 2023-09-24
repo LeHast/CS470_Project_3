@@ -11,14 +11,17 @@ const refreshPage = () => {
 }
 
 const BasicModal = (props) => {
-    const [open, setOpen] = React.useState(false);
+    //const [open, setOpen] = React.useState(false);
     const { toOpen } = props;
+    const { player } = props;
+
     const toWin = toOpen;
     let DisplayOverlay ='';
     let displayButtonColor ='';
 
+
     if (toWin){
-      DisplayOverlay = 'WIN!';
+      DisplayOverlay = (player + ' WIN!');
       displayButtonColor = 'success';
     }else{
       DisplayOverlay = 'LOSE!'
