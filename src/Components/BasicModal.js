@@ -19,8 +19,11 @@ const BasicModal = (props) => {
     let DisplayOverlay ='';
     let displayButtonColor ='';
 
+    if (player === 'Draw'){
+      DisplayOverlay = 'DRAW!';
 
-    if (toWin){
+    }
+    else if (toWin){
       DisplayOverlay = (player + ' WIN!');
       displayButtonColor = 'success';
     }else{

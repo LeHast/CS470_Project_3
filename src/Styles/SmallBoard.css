@@ -15,8 +15,8 @@
 }
 
 .CellBoard{
-    height: 12vh;
-    width: 12vh;
+    height: 10vh;
+    width: 10vh;
     padding: 5px;
     border-style: solid;
     border-color: #430000;

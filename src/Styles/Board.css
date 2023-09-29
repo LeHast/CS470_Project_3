@@ -1,3 +1,13 @@
 .dd{
     background-color: azure;
 }
+
+.PlayerDisplay{
+    color: white;
+    font-size: 3rem;
+    text-align: left;
+}
+
+.GameBoard{
+    margin-left: 15%;
+}

@@ -147,11 +147,11 @@ const Board = (props) =>
     const playerColorState = [{backgroundColor: '#ffffff'}, {backgroundColor: '#000000'}];
     const sxColorInitialState = new Array(6).fill(new Array(6).fill({ backgroundColor: '#primary' }));
     const [sxColor, setSxColor] = useState(sxColorInitialState); // player board
-    const [playerState, setPlayerState] = useState(0); // 0 white, 1 black
+    const [playerState, setPlayerState] = useState(0); // 0 white, 1 black, 2 Draw
     const [disabledRontateButton, setdisabledRontateButton] = useState(true);
 
     const ChangeColor = (row, col) => {
-        if (!disabledRontateButton)
+        if (!disabledRontateButton || sxColor[row][col].backgroundColor !== '#primary')
             return;
 
         const c = sxColor.map(innerArray => innerArray.map(obj => ({ ...obj })));
@@ -164,9 +164,19 @@ const Board = (props) =>
             setPlayerState(0);
         }
         setdisabledRontateButton(false);
-        stopGame = checkForFiveIdenticalValues(c, 0); // check for white
+        let winWhite = false;
+        let winBlack = false;
+        winWhite = checkForFiveIdenticalValues(c, 0);
+        winBlack = checkForFiveIdenticalValues(c, 1);
 
-    } 
+        if (winWhite && winBlack){
+          wonPlayer = 'Draw'
+          stopGame = true;
+        }
+        else if (winWhite || winBlack){
+          stopGame = true;
+        }    
+      } 
 
     // sections: 
     // 0 top-L
@@ -231,12 +241,37 @@ const Board = (props) =>
           y++
         }
         setSxColor(c1);
+        
+        let winWhite = false;
+        let winBlack = false;
+        winWhite = checkForFiveIdenticalValues(c1, 0);
+        winBlack = checkForFiveIdenticalValues(c1, 1);
+        
+        if (winWhite && winBlack){
+          wonPlayer = 'Draw'
+          stopGame = true;
+        }
+        else if (winWhite || winBlack){
+          stopGame = true;
+        }
         setdisabledRontateButton(true); // Disabled, rotation finished
-        stopGame = checkForFiveIdenticalValues(sxColor, 0);
+        return;
+    }
+
+    // Out of funcutoins
+    let playerDisplay;
+    if (wonPlayer === 'Draw'){
+      playerDisplay = 'Draw';
+    }
+    else if (playerState === 0){
+      playerDisplay = 'White Turn';
+    }else{
+      playerDisplay = 'Black Turn';
     }
 
     return(
-        <Box>
+        <Box className='GameBoard'>
+          <h1 className='PlayerDisplay'>{playerDisplay}</h1>
             <Box className='GridBoard'> 
                 <Box>
                     <Button variant='contained' className='btDirection' disabled={disabledRontateButton} onClick={() => rotateMatrix(0, false)}>Left</Button>
@@ -245,7 +280,7 @@ const Board = (props) =>
                         {
                             sxColor.slice(0,3).map((row, rowIdx) =>
                             row.slice(0,3).map((cell, colIndex) => ( 
-                                <Box key={colIndex} item='true' sx={sxColor[rowIdx][colIndex]} className='CellBoard' onClick={() => ChangeColor(rowIdx, colIndex)} > {rowIdx} {colIndex}</Box>
+                                <Box key={colIndex} item='true' sx={sxColor[rowIdx][colIndex]} className='CellBoard' onClick={() => ChangeColor(rowIdx, colIndex)} ></Box>
 
                             ))
                         )}
@@ -258,7 +293,7 @@ const Board = (props) =>
                     {
                       sxColor.slice(0,3).map((row, rowIdx) =>
                       row.slice(3,6).map((cell, colIndex) => ( 
-                        <Box key={colIndex} item='true' sx={sxColor[rowIdx][colIndex + 3]} className='CellBoard' onClick={() => ChangeColor(rowIdx, colIndex + 3)}> {rowIdx} {colIndex + 3}</Box>
+                        <Box key={colIndex} item='true' sx={sxColor[rowIdx][colIndex + 3]} className='CellBoard' onClick={() => ChangeColor(rowIdx, colIndex + 3)}></Box>
                         
                         ))
                         )}
@@ -273,20 +308,20 @@ const Board = (props) =>
                     {
                       sxColor.slice(3,6).map((row, rowIdx) =>
                       row.slice(0,3).map((cell, colIndex) => ( 
-                        <Box key={colIndex} item='true' sx={sxColor[rowIdx+3][colIndex]} className='CellBoard' onClick={() => ChangeColor(rowIdx + 3, colIndex)}> {rowIdx+3} {colIndex}</Box>
+                        <Box key={colIndex} item='true' sx={sxColor[rowIdx+3][colIndex]} className='CellBoard' onClick={() => ChangeColor(rowIdx + 3, colIndex)}></Box>
                         
                         ))
                         )}
                 </Grid>
-                <Button variant='contained' className='btDirection' disabled={disabledRontateButton} onClick={() => rotateMatrix(2, true)}>Right</Button>
                 <Button variant='contained' className='btDirection' disabled={disabledRontateButton} onClick={() => rotateMatrix(2, false)}>Left</Button>
+                <Button variant='contained' className='btDirection' disabled={disabledRontateButton} onClick={() => rotateMatrix(2, true)}>Right</Button>
                 </Box>
                 <Box>
                 <Grid className="GridBox" >
                     {
                       sxColor.slice(3,6).map((row, rowIdx) =>
                       row.slice(3,6).map((cell, colIndex) => ( 
-                        <Box key={colIndex} item='true' sx={sxColor[rowIdx+3][colIndex + 3]} className='CellBoard' onClick={() => ChangeColor(rowIdx + 3, colIndex + 3)}> {rowIdx+3} {colIndex + 3}</Box>
+                        <Box key={colIndex} item='true' sx={sxColor[rowIdx+3][colIndex + 3]} className='CellBoard' onClick={() => ChangeColor(rowIdx + 3, colIndex + 3)}></Box>
                         
                         ))
                         )}
